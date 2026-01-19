@@ -137,7 +137,7 @@ public class MessageParseException : ClaudeSDKException
     /// <summary>
     /// The raw data that failed to parse.
     /// </summary>
-    public Dictionary<string, object?>? Data { get; }
+    public new Dictionary<string, object?>? RawData { get; }
 
     /// <summary>
     /// Initializes a new instance of the MessageParseException class.
@@ -145,7 +145,7 @@ public class MessageParseException : ClaudeSDKException
     public MessageParseException(string message, Dictionary<string, object?>? data = null)
         : base(message)
     {
-        Data = data;
+        RawData = data;
     }
 
     /// <summary>
@@ -154,7 +154,7 @@ public class MessageParseException : ClaudeSDKException
     public MessageParseException(string message, Dictionary<string, object?>? data, Exception innerException)
         : base(message, innerException)
     {
-        Data = data;
+        RawData = data;
     }
 }
 

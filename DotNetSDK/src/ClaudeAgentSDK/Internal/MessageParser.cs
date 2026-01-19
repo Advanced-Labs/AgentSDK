@@ -167,7 +167,7 @@ public static class MessageParser
         return "";
     }
 
-    private static IReadOnlyList<IContentBlock> ParseContentBlocks(JsonElement messageElement)
+    private static List<IContentBlock> ParseContentBlocks(JsonElement messageElement)
     {
         if (messageElement.TryGetProperty("content", out var contentElement) &&
             contentElement.ValueKind == JsonValueKind.Array)
@@ -178,7 +178,7 @@ public static class MessageParser
         return [];
     }
 
-    private static IReadOnlyList<IContentBlock> ParseContentBlocksFromElement(JsonElement contentElement)
+    private static List<IContentBlock> ParseContentBlocksFromElement(JsonElement contentElement)
     {
         var blocks = new List<IContentBlock>();
 

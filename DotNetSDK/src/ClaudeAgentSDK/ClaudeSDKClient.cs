@@ -261,8 +261,7 @@ public sealed class ClaudeSDKClient : IAsyncDisposable
 
     private void EnsureNotDisposed()
     {
-        if (_isDisposed)
-            throw new ObjectDisposedException(nameof(ClaudeSDKClient));
+        ObjectDisposedException.ThrowIf(_isDisposed, this);
     }
 
     private void EnsureConnected()

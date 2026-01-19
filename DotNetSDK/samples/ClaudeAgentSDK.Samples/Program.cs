@@ -39,6 +39,75 @@ void OnStderr(string line)
 }
 
 // ============================================
+// Test 0: Raw CLI test - see what the CLI actually outputs
+// ============================================
+Log("=== Test 0: Raw CLI Output Test ===");
+try
+{
+    var cliPath = FindCli();
+    Log($"Running CLI directly with --output-format stream-json");
+
+    var process = new System.Diagnostics.Process
+    {
+        StartInfo = new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = cliPath,
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true,
+            WorkingDirectory = workingDir
+        }
+    };
+    process.StartInfo.ArgumentList.Add("--output-format");
+    process.StartInfo.ArgumentList.Add("stream-json");
+    process.StartInfo.ArgumentList.Add("--verbose");
+    process.StartInfo.ArgumentList.Add("--print");
+    process.StartInfo.ArgumentList.Add("--");
+    process.StartInfo.ArgumentList.Add("What is 2+2? Reply with just the number.");
+
+    Log($"Command: {cliPath} {string.Join(" ", process.StartInfo.ArgumentList)}");
+
+    process.Start();
+
+    // Read stdout and stderr
+    var stdoutTask = process.StandardOutput.ReadToEndAsync();
+    var stderrTask = process.StandardError.ReadToEndAsync();
+
+    await process.WaitForExitAsync();
+
+    var stdout = await stdoutTask;
+    var stderr = await stderrTask;
+
+    Log($"Exit code: {process.ExitCode}");
+    Log($"STDOUT ({stdout.Length} chars):");
+    var lines = stdout.Split('\n');
+    foreach (var line in lines.Take(20))
+    {
+        if (!string.IsNullOrWhiteSpace(line))
+            Log($"  {line.TrimEnd()}");
+    }
+    if (lines.Length > 20)
+        Log($"  ... ({lines.Length - 20} more lines)");
+
+    if (!string.IsNullOrWhiteSpace(stderr))
+    {
+        Log($"STDERR ({stderr.Length} chars):");
+        foreach (var line in stderr.Split('\n').Take(10))
+        {
+            if (!string.IsNullOrWhiteSpace(line))
+                Log($"  {line.TrimEnd()}");
+        }
+    }
+}
+catch (Exception ex)
+{
+    Log($"Test 0 FAILED: {ex.GetType().Name}: {ex.Message}");
+}
+
+Log("");
+
+// ============================================
 // Test 1: Simple query with verbose output
 // ============================================
 Log("=== Test 1: Simple One-Shot Query ===");

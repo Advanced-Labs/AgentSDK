@@ -146,10 +146,15 @@ public sealed class QueryHandler : IAsyncDisposable
     /// </summary>
     public async Task SendQueryAsync(string prompt, string? sessionId = null, CancellationToken cancellationToken = default)
     {
+        // CLI expects nested message structure: {"type":"user","message":{"role":"user","content":"..."}}
         var message = new Dictionary<string, object?>
         {
             ["type"] = "user",
-            ["content"] = prompt
+            ["message"] = new Dictionary<string, object?>
+            {
+                ["role"] = "user",
+                ["content"] = prompt
+            }
         };
 
         if (!string.IsNullOrEmpty(sessionId))

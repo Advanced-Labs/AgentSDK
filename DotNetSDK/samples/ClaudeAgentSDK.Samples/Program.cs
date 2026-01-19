@@ -1,9 +1,17 @@
 using ClaudeAgentSDK;
 using ClaudeAgentSDK.Models;
 
+// Use the current working directory as the CLI's working directory
+// This prevents Claude Code from operating on the SDK repo itself
+var workingDir = Environment.CurrentDirectory;
+Console.WriteLine($"Working directory: {workingDir}");
+Console.WriteLine();
+
 // Example 1: Simple one-shot query
 Console.WriteLine("=== Example 1: Simple Query ===");
-await foreach (var message in ClaudeAgent.QueryAsync("What is 2 + 2?"))
+var baseOptions = new ClaudeAgentOptions { WorkingDirectory = workingDir };
+
+await foreach (var message in ClaudeAgent.QueryAsync("What is 2 + 2?", baseOptions))
 {
     switch (message)
     {
@@ -28,6 +36,7 @@ await foreach (var message in ClaudeAgent.QueryAsync("What is 2 + 2?"))
 Console.WriteLine("\n=== Example 2: Query with Options ===");
 var options = new ClaudeAgentOptions
 {
+    WorkingDirectory = workingDir,
     Model = "claude-sonnet-4-20250514",
     MaxTurns = 3,
     PermissionMode = PermissionMode.AcceptEdits
@@ -38,9 +47,12 @@ var resultText = await ClaudeAgent.QueryTextAsync(
     options);
 Console.WriteLine(resultText);
 
-// Example 3: Interactive client
+// Example 3: Interactive client (maintains same context window across queries)
 Console.WriteLine("\n=== Example 3: Interactive Client ===");
-await using var client = ClaudeAgent.CreateClient();
+var clientOptions = new ClaudeAgentOptions { WorkingDirectory = workingDir };
+await using var client = ClaudeAgent.CreateClient(clientOptions);
+
+// First query starts the conversation
 await client.ConnectAsync("Hello! Remember my name is Alice.");
 
 await foreach (var message in client.ReceiveResponseAsync())
@@ -58,7 +70,7 @@ await foreach (var message in client.ReceiveResponseAsync())
 }
 Console.WriteLine();
 
-// Follow-up in same session
+// Follow-up query in the SAME context window - Claude remembers "Alice"
 await client.QueryAsync("What's my name?");
 await foreach (var message in client.ReceiveResponseAsync())
 {
@@ -77,7 +89,7 @@ Console.WriteLine();
 
 // Example 4: Handling tool use
 Console.WriteLine("\n=== Example 4: Tool Use ===");
-await foreach (var message in ClaudeAgent.QueryAsync("What files are in the current directory?"))
+await foreach (var message in ClaudeAgent.QueryAsync("What files are in the current directory?", baseOptions))
 {
     switch (message)
     {
@@ -112,6 +124,7 @@ await foreach (var message in ClaudeAgent.QueryAsync("What files are in the curr
 Console.WriteLine("\n=== Example 5: Custom Permission Callback ===");
 var optionsWithCallback = new ClaudeAgentOptions
 {
+    WorkingDirectory = workingDir,
     CanUseTool = async (request) =>
     {
         Console.WriteLine($"Permission requested for tool: {request.ToolName}");

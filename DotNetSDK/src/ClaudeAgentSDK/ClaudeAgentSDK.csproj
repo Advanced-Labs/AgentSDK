@@ -23,7 +23,10 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
-    <NoWarn>CS1591</NoWarn>
+    <!-- CS1591: Missing XML comment - some internal members don't need docs -->
+    <!-- CA1822: Mark members as static - instance properties for serialization/API design -->
+    <!-- CA1848: Use LoggerMessage delegates - excessive for SDK simplicity -->
+    <NoWarn>CS1591;CA1822;CA1848</NoWarn>
 
     <!-- Output -->
     <OutputPath>..\..\artifacts\bin\$(Configuration)\</OutputPath>

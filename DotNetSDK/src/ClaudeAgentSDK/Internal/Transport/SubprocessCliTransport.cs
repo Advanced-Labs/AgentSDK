@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
@@ -56,10 +57,9 @@ public sealed class SubprocessCliTransport : ITransport
     }
 
     /// <inheritdoc />
-    public async Task ConnectAsync(CancellationToken cancellationToken = default)
+    public Task ConnectAsync(CancellationToken cancellationToken = default)
     {
-        if (_isDisposed)
-            throw new ObjectDisposedException(nameof(SubprocessCliTransport));
+        ObjectDisposedException.ThrowIf(_isDisposed, this);
 
         if (_isReady)
             throw new ClaudeAgentSDK.InvalidOperationException("Transport is already connected");
@@ -131,13 +131,14 @@ public sealed class SubprocessCliTransport : ITransport
         {
             throw new CliConnectionException($"Failed to start Claude CLI: {ex.Message}", ex);
         }
+
+        return Task.CompletedTask;
     }
 
     /// <inheritdoc />
     public async Task WriteAsync(string data, CancellationToken cancellationToken = default)
     {
-        if (_isDisposed)
-            throw new ObjectDisposedException(nameof(SubprocessCliTransport));
+        ObjectDisposedException.ThrowIf(_isDisposed, this);
 
         if (!_isStreamingMode)
             throw new ClaudeAgentSDK.InvalidOperationException("Cannot write in non-streaming mode");
@@ -169,8 +170,7 @@ public sealed class SubprocessCliTransport : ITransport
     public async IAsyncEnumerable<Dictionary<string, object?>> ReadMessagesAsync(
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        if (_isDisposed)
-            throw new ObjectDisposedException(nameof(SubprocessCliTransport));
+        ObjectDisposedException.ThrowIf(_isDisposed, this);
 
         if (_stdout == null)
             throw new NotConnectedException("Transport is not connected");
@@ -242,7 +242,7 @@ public sealed class SubprocessCliTransport : ITransport
         // Check for process exit
         if (_process != null && _process.HasExited && _process.ExitCode != 0)
         {
-            var stderrContent = await GetStderrContentAsync();
+            var stderrContent = GetStderrContent();
             throw new ProcessException(
                 $"CLI process exited with code {_process.ExitCode}",
                 _process.ExitCode,
@@ -447,19 +447,19 @@ public sealed class SubprocessCliTransport : ITransport
         if (_options?.MaxTurns != null)
         {
             args.Add("--max-turns");
-            args.Add(_options.MaxTurns.Value.ToString());
+            args.Add(_options.MaxTurns.Value.ToString(CultureInfo.InvariantCulture));
         }
 
         if (_options?.MaxBudgetUsd != null)
         {
             args.Add("--max-budget-usd");
-            args.Add(_options.MaxBudgetUsd.Value.ToString("F2"));
+            args.Add(_options.MaxBudgetUsd.Value.ToString("F2", CultureInfo.InvariantCulture));
         }
 
         if (_options?.MaxThinkingTokens != null)
         {
             args.Add("--max-thinking-tokens");
-            args.Add(_options.MaxThinkingTokens.Value.ToString());
+            args.Add(_options.MaxThinkingTokens.Value.ToString(CultureInfo.InvariantCulture));
         }
 
         // Permission mode
@@ -646,7 +646,7 @@ public sealed class SubprocessCliTransport : ITransport
         }
     }
 
-    private async Task<string> GetStderrContentAsync()
+    private static string GetStderrContent()
     {
         // Note: In the current implementation, stderr is read line-by-line
         // and not accumulated. If needed, we could store it.

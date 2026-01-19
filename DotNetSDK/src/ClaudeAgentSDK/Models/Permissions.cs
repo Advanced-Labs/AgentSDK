@@ -23,13 +23,13 @@ public sealed class ToolPermissionContext
     /// Absolute paths of files that have been read.
     /// </summary>
     [JsonPropertyName("readable_paths")]
-    public IReadOnlyList<string>? ReadablePaths { get; init; }
+    public List<string>? ReadablePaths { get; init; }
 
     /// <summary>
     /// Absolute paths of files that have been written.
     /// </summary>
     [JsonPropertyName("writable_paths")]
-    public IReadOnlyList<string>? WritablePaths { get; init; }
+    public List<string>? WritablePaths { get; init; }
 }
 
 /// <summary>
@@ -83,7 +83,7 @@ public sealed class PermissionResultAllow : PermissionResult
     /// Updates to apply to the permission rules.
     /// </summary>
     [JsonPropertyName("updatedPermissions")]
-    public IReadOnlyList<PermissionUpdate>? UpdatedPermissions { get; init; }
+    public List<PermissionUpdate>? UpdatedPermissions { get; init; }
 }
 
 /// <summary>
@@ -224,7 +224,7 @@ public sealed class PermissionUpdate
     /// Rules to add, replace, or remove.
     /// </summary>
     [JsonPropertyName("rules")]
-    public IReadOnlyList<PermissionRuleValue>? Rules { get; init; }
+    public List<PermissionRuleValue>? Rules { get; init; }
 
     /// <summary>
     /// The behavior for the update (for rule updates).
@@ -242,7 +242,7 @@ public sealed class PermissionUpdate
     /// Directories to add or remove.
     /// </summary>
     [JsonPropertyName("directories")]
-    public IReadOnlyList<string>? Directories { get; init; }
+    public List<string>? Directories { get; init; }
 
     /// <summary>
     /// Destination for the update.

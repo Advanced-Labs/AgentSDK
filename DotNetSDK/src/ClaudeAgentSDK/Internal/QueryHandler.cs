@@ -13,6 +13,11 @@ namespace ClaudeAgentSDK.Internal;
 /// </summary>
 public sealed class QueryHandler : IAsyncDisposable
 {
+    private static readonly JsonSerializerOptions SnakeCaseJsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+    };
+
     private readonly ITransport _transport;
     private readonly bool _isStreamingMode;
     private readonly Func<ToolPermissionRequest, Task<PermissionResult>>? _canUseTool;
@@ -125,7 +130,7 @@ public sealed class QueryHandler : IAsyncDisposable
 
         await foreach (var message in input.WithCancellation(cancellationToken))
         {
-            var json = JsonSerializer.Serialize(message);
+            var json = JsonSerializer.Serialize(message, SnakeCaseJsonOptions);
             await _transport.WriteAsync(json, cancellationToken);
         }
     }
@@ -146,7 +151,7 @@ public sealed class QueryHandler : IAsyncDisposable
             message["session_id"] = sessionId;
         }
 
-        var json = JsonSerializer.Serialize(message);
+        var json = JsonSerializer.Serialize(message, SnakeCaseJsonOptions);
         await _transport.WriteAsync(json, cancellationToken);
     }
 
@@ -504,10 +509,7 @@ public sealed class QueryHandler : IAsyncDisposable
                 Request = request
             };
 
-            var json = JsonSerializer.Serialize(controlRequest, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
-            });
+            var json = JsonSerializer.Serialize(controlRequest, SnakeCaseJsonOptions);
 
             await _transport.WriteAsync(json, cancellationToken);
 
@@ -539,10 +541,7 @@ public sealed class QueryHandler : IAsyncDisposable
 
         var wrapper = new SdkControlResponse { Response = controlResponse };
 
-        var json = JsonSerializer.Serialize(wrapper, new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
-        });
+        var json = JsonSerializer.Serialize(wrapper, SnakeCaseJsonOptions);
 
         await _transport.WriteAsync(json, cancellationToken);
     }
@@ -608,7 +607,7 @@ public sealed class QueryHandler : IAsyncDisposable
         return null;
     }
 
-    private static IReadOnlyList<string>? GetStringList(Dictionary<string, object?>? dict, string key)
+    private static List<string>? GetStringList(Dictionary<string, object?>? dict, string key)
     {
         if (dict == null) return null;
         if (dict.TryGetValue(key, out var value))

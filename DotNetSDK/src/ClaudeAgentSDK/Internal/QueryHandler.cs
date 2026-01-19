@@ -148,7 +148,7 @@ public sealed class QueryHandler : IAsyncDisposable
     {
         var message = new Dictionary<string, object?>
         {
-            ["type"] = "user_message",
+            ["type"] = "user",
             ["content"] = prompt
         };
 

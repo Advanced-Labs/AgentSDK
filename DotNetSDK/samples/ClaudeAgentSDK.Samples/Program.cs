@@ -35,7 +35,7 @@ Log($"");
 // Stderr callback to capture CLI debug output
 void OnStderr(string line)
 {
-    Log($"[STDERR] {line}", alsoConsole: false);
+    Log($"[STDERR] {line}");
 }
 
 // ============================================

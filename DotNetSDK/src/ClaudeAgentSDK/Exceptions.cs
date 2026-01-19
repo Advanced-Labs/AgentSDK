@@ -137,7 +137,7 @@ public class MessageParseException : ClaudeSDKException
     /// <summary>
     /// The raw data that failed to parse.
     /// </summary>
-    public new Dictionary<string, object?>? RawData { get; }
+    public Dictionary<string, object?>? RawData { get; }
 
     /// <summary>
     /// Initializes a new instance of the MessageParseException class.

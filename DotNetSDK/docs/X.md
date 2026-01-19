@@ -10,6 +10,7 @@ This document provides a comprehensive overview of the Claude Agent SDK for .NET
 
 ### Legend
 - ✅ **PASSED** - Feature tested and working
+- 🧪 **TEST READY** - Test implemented, ready to run
 - ⚠️ **NOT TESTED** - Feature implemented but not yet tested
 - ❌ **FAILED** - Feature tested but failing
 
@@ -20,10 +21,10 @@ This document provides a comprehensive overview of the Claude Agent SDK for .NET
 | Feature | Implementation | Test Status | Notes |
 |---------|---------------|-------------|-------|
 | One-shot queries | `ClaudeAgent.QueryAsync()` | ✅ PASSED | Test 1 |
-| Query to list | `ClaudeAgent.QueryToListAsync()` | ⚠️ NOT TESTED | Convenience wrapper |
-| Query to text | `ClaudeAgent.QueryTextAsync()` | ⚠️ NOT TESTED | Returns final result string |
+| Query to list | `ClaudeAgent.QueryToListAsync()` | 🧪 TEST READY | Test 15 |
+| Query to text | `ClaudeAgent.QueryTextAsync()` | 🧪 TEST READY | Test 16 |
 | Interactive streaming | `ClaudeSDKClient` | ✅ PASSED | Test 3 |
-| Multi-turn conversation | `client.QueryAsync()` | ⚠️ NOT TESTED | Follow-up queries |
+| Multi-turn conversation | `client.QueryAsync()` | 🧪 TEST READY | Test 10 |
 | Async enumeration | `IAsyncEnumerable<IMessage>` | ✅ PASSED | Tests 1, 3 |
 | CLI subprocess | `SubprocessCliTransport` | ✅ PASSED | Tests 0, 2 |
 
@@ -35,9 +36,9 @@ This document provides a comprehensive overview of the Claude Agent SDK for .NET
 |--------------|-------|-------------|-------|
 | System | `SystemMessage` | ✅ PASSED | Init messages received |
 | Assistant | `AssistantMessage` | ✅ PASSED | Response with content |
-| User | `UserMessage` | ⚠️ NOT TESTED | Echoed user input |
+| User | `UserMessage` | 🧪 TEST READY | Test A13 |
 | Result | `ResultMessage` | ✅ PASSED | Final result with metadata |
-| Stream Event | `StreamEvent` | ⚠️ NOT TESTED | Partial streaming updates |
+| Stream Event | `StreamEvent` | 🧪 TEST READY | Test A3 |
 
 ---
 
@@ -46,9 +47,9 @@ This document provides a comprehensive overview of the Claude Agent SDK for .NET
 | Block Type | Class | Test Status | Notes |
 |------------|-------|-------------|-------|
 | Text | `TextBlock` | ✅ PASSED | Basic text responses |
-| Thinking | `ThinkingBlock` | ⚠️ NOT TESTED | Extended thinking content |
-| Tool Use | `ToolUseBlock` | ⚠️ NOT TESTED | Tool invocation |
-| Tool Result | `ToolResultBlock` | ⚠️ NOT TESTED | Tool execution results |
+| Thinking | `ThinkingBlock` | 🧪 TEST READY | Test A4 |
+| Tool Use | `ToolUseBlock` | 🧪 TEST READY | Test 24 |
+| Tool Result | `ToolResultBlock` | 🧪 TEST READY | Test A13 |
 
 ---
 
@@ -56,12 +57,13 @@ This document provides a comprehensive overview of the Claude Agent SDK for .NET
 
 | Feature | Method | Test Status | Notes |
 |---------|--------|-------------|-------|
-| Permission callbacks | `CanUseTool` delegate | ⚠️ NOT TESTED | Approve/deny tool use |
-| Hook callbacks | `Hooks` dictionary | ⚠️ NOT TESTED | Event-based callbacks |
-| Interrupt | `InterruptAsync()` | ⚠️ NOT TESTED | Stop current operation |
-| Set permission mode | `SetPermissionModeAsync()` | ⚠️ NOT TESTED | Change mode mid-session |
-| Set model | `SetModelAsync()` | ⚠️ NOT TESTED | Change model mid-session |
-| Rewind files | `RewindFilesAsync()` | ⚠️ NOT TESTED | Checkpoint restoration |
+| Permission callbacks | `CanUseTool` delegate | 🧪 TEST READY | Test 11 |
+| Hook callbacks | `Hooks` dictionary | 🧪 TEST READY | Tests 12, 20, A8-A10 |
+| Interrupt | `InterruptAsync()` | 🧪 TEST READY | Test 21 |
+| Set permission mode | `SetPermissionModeAsync()` | 🧪 TEST READY | Test 23 |
+| Set model | `SetModelAsync()` | 🧪 TEST READY | Test 22 |
+| Rewind files | `RewindFilesAsync()` | 🧪 TEST READY | Test A12 |
+| Server info | `ServerInfo` property | 🧪 TEST READY | Test A11 |
 
 ---
 
@@ -69,12 +71,12 @@ This document provides a comprehensive overview of the Claude Agent SDK for .NET
 
 | Hook Event | Class | Test Status | Notes |
 |------------|-------|-------------|-------|
-| PreToolUse | `PreToolUseHookInput` | ⚠️ NOT TESTED | Before tool execution |
-| PostToolUse | `PostToolUseHookInput` | ⚠️ NOT TESTED | After tool execution |
-| UserPromptSubmit | `UserPromptSubmitHookInput` | ⚠️ NOT TESTED | User prompt validation |
-| Stop | `StopHookInput` | ⚠️ NOT TESTED | Session stop event |
-| SubagentStop | `SubagentStopHookInput` | ⚠️ NOT TESTED | Subagent completion |
-| PreCompact | `PreCompactHookInput` | ⚠️ NOT TESTED | Before context compaction |
+| PreToolUse | `PreToolUseHookInput` | 🧪 TEST READY | Tests 12, A10 |
+| PostToolUse | `PostToolUseHookInput` | 🧪 TEST READY | Test 20 |
+| UserPromptSubmit | `UserPromptSubmitHookInput` | 🧪 TEST READY | Test A8 |
+| Stop | `StopHookInput` | 🧪 TEST READY | Test A9 |
+| SubagentStop | `SubagentStopHookInput` | ⚠️ NOT TESTED | Requires multi-agent setup |
+| PreCompact | `PreCompactHookInput` | ⚠️ NOT TESTED | Requires large context |
 
 ---
 
@@ -83,19 +85,19 @@ This document provides a comprehensive overview of the Claude Agent SDK for .NET
 | Option | Property | Test Status | Notes |
 |--------|----------|-------------|-------|
 | Working directory | `WorkingDirectory` | ✅ PASSED | Tests 1, 3 |
-| System prompt | `SystemPrompt` | ⚠️ NOT TESTED | Custom instructions |
-| Model | `Model` | ⚠️ NOT TESTED | Model selection |
-| Fallback model | `FallbackModel` | ⚠️ NOT TESTED | Backup model |
-| Max turns | `MaxTurns` | ⚠️ NOT TESTED | Turn limit |
-| Max budget | `MaxBudgetUsd` | ⚠️ NOT TESTED | Cost limit |
-| Max thinking tokens | `MaxThinkingTokens` | ⚠️ NOT TESTED | Thinking limit |
-| Permission mode | `PermissionMode` | ⚠️ NOT TESTED | Default/AcceptEdits/Plan/Bypass |
-| Tools preset | `ToolsPreset` | ⚠️ NOT TESTED | all/computer/none |
-| Allowed tools | `AllowedTools` | ⚠️ NOT TESTED | Whitelist |
-| Disallowed tools | `DisallowedTools` | ⚠️ NOT TESTED | Blacklist |
-| Environment vars | `Environment` | ⚠️ NOT TESTED | Custom env vars |
+| System prompt | `SystemPrompt` | 🧪 TEST READY | Test 4 |
+| Model | `Model` | 🧪 TEST READY | Test 5 |
+| Fallback model | `FallbackModel` | 🧪 TEST READY | Test A5 |
+| Max turns | `MaxTurns` | 🧪 TEST READY | Test 6 |
+| Max budget | `MaxBudgetUsd` | 🧪 TEST READY | Test 7 |
+| Max thinking tokens | `MaxThinkingTokens` | 🧪 TEST READY | Test A4 |
+| Permission mode | `PermissionMode` | 🧪 TEST READY | Tests 8, 18 |
+| Tools preset | `ToolsPreset` | ⚠️ NOT TESTED | Basic enum |
+| Allowed tools | `AllowedTools` | 🧪 TEST READY | Tests 14, 19 |
+| Disallowed tools | `DisallowedTools` | 🧪 TEST READY | Test 9 |
+| Environment vars | `Environment` | 🧪 TEST READY | Test 17 |
 | Stderr callback | `StderrCallback` | ✅ PASSED | Debug output |
-| Custom CLI path | `CliPath` | ⚠️ NOT TESTED | Non-standard CLI location |
+| Custom CLI path | `CliPath` | ⚠️ NOT TESTED | Requires custom install |
 
 ---
 
@@ -103,9 +105,9 @@ This document provides a comprehensive overview of the Claude Agent SDK for .NET
 
 | Feature | Property/Method | Test Status | Notes |
 |---------|----------------|-------------|-------|
-| Continue conversation | `ContinueConversation` | ⚠️ NOT TESTED | Resume last session |
-| Resume session | `Resume` | ⚠️ NOT TESTED | Resume by ID |
-| Fork session | `ForkSession` | ⚠️ NOT TESTED | Branch from session |
+| Continue conversation | `ContinueConversation` | 🧪 TEST READY | Test 25 |
+| Resume session | `Resume` | 🧪 TEST READY | Test A1 |
+| Fork session | `ForkSession` | 🧪 TEST READY | Test A2 |
 
 ---
 
@@ -113,19 +115,21 @@ This document provides a comprehensive overview of the Claude Agent SDK for .NET
 
 | Feature | Property | Test Status | Notes |
 |---------|----------|-------------|-------|
-| MCP servers | `McpServers` / `McpConfigPath` | ⚠️ NOT TESTED | Model Context Protocol |
-| Agents | `Agents` | ⚠️ NOT TESTED | Custom agents |
-| Plugins | `Plugins` | ⚠️ NOT TESTED | Plugin directories |
-| Sandbox | `Sandbox` | ⚠️ NOT TESTED | Sandbox configuration |
-| JSON schema output | `OutputFormat` | ⚠️ NOT TESTED | Structured responses |
-| File checkpointing | `EnableFileCheckpointing` | ⚠️ NOT TESTED | File state tracking |
-| Additional dirs | `AddDirs` | ⚠️ NOT TESTED | Extra directories |
-| Beta features | `Betas` | ⚠️ NOT TESTED | Beta flag list |
-| Partial messages | `IncludePartialMessages` | ⚠️ NOT TESTED | Streaming partials |
+| MCP servers | `McpServers` / `McpConfigPath` | ⚠️ NOT TESTED | Requires MCP server setup |
+| Agents | `Agents` | ⚠️ NOT TESTED | Requires agent definitions |
+| Plugins | `Plugins` | ⚠️ NOT TESTED | Requires plugin setup |
+| Sandbox | `Sandbox` | ⚠️ NOT TESTED | Requires sandbox config |
+| JSON schema output | `OutputFormat` | 🧪 TEST READY | Test 13 |
+| File checkpointing | `EnableFileCheckpointing` | 🧪 TEST READY | Test A12 |
+| Additional dirs | `AddDirs` | 🧪 TEST READY | Test A7 |
+| Beta features | `Betas` | 🧪 TEST READY | Test A6 |
+| Partial messages | `IncludePartialMessages` | 🧪 TEST READY | Test A3 |
 
 ---
 
 ## Current Test Results
+
+### Basic Tests (Tests 0-3)
 
 ### Test 0: Raw CLI Output
 - **Status**: ✅ PASSED
@@ -146,6 +150,88 @@ This document provides a comprehensive overview of the Claude Agent SDK for .NET
 - **Status**: ✅ PASSED
 - **Messages**: 3 (system, assistant, result)
 - **Response**: "Hello! I'm Claude, ready to help..."
+
+---
+
+## New Test Suites
+
+### Feature Tests (Tests 4-25)
+
+Located in `samples/ClaudeAgentSDK.Samples/FeatureTests.cs`
+
+| Test | Feature | Estimated Cost |
+|------|---------|---------------|
+| Test 4 | System Prompt | ~$0.04 |
+| Test 5 | Model Selection | ~$0.03 |
+| Test 6 | Max Turns Limit | ~$0.04 |
+| Test 7 | Budget Limit | ~$0.01 |
+| Test 8 | Plan Permission Mode | ~$0.05 |
+| Test 9 | Disallowed Tools | ~$0.04 |
+| Test 10 | Multi-Turn Conversation | ~$0.08 |
+| Test 11 | Permission Callback | ~$0.08 |
+| Test 12 | PreToolUse Hook | ~$0.06 |
+| Test 13 | Structured Output | ~$0.04 |
+| Test 14 | Safe File Operations | ~$0.10 |
+| Test 15 | QueryToListAsync | ~$0.03 |
+| Test 16 | QueryTextAsync | ~$0.03 |
+| Test 17 | Environment Variables | ~$0.05 |
+| Test 18 | AcceptEdits Mode | ~$0.05 |
+| Test 19 | Allowed Tools Whitelist | ~$0.10 |
+| Test 20 | PostToolUse Hook | ~$0.10 |
+| Test 21 | Interactive Client Interrupt | ~$0.15 |
+| Test 22 | Dynamic Model Change | ~$0.15 |
+| Test 23 | Dynamic Permission Mode | ~$0.15 |
+| Test 24 | Tool Use Content Block | ~$0.15 |
+| Test 25 | Continue Conversation | ~$0.10 |
+| **Total** | | **~$1.63** |
+
+### Advanced Tests (Tests A1-A14)
+
+Located in `samples/ClaudeAgentSDK.Samples/AdvancedFeatureTests.cs`
+
+| Test | Feature | Estimated Cost |
+|------|---------|---------------|
+| Test A1 | Resume Session | ~$0.20 |
+| Test A2 | Fork Session | ~$0.20 |
+| Test A3 | Partial Messages (StreamEvent) | ~$0.10 |
+| Test A4 | Extended Thinking (ThinkingBlock) | ~$0.20 |
+| Test A5 | Fallback Model | ~$0.05 |
+| Test A6 | Beta Features | ~$0.10 |
+| Test A7 | Additional Directories | ~$0.10 |
+| Test A8 | UserPromptSubmit Hook | ~$0.10 |
+| Test A9 | Stop Hook | ~$0.10 |
+| Test A10 | Block Tool via Hook | ~$0.15 |
+| Test A11 | Server Info | ~$0.05 |
+| Test A12 | File Rewind (Checkpointing) | ~$0.20 |
+| Test A13 | Tool Result Block | ~$0.15 |
+| Test A14 | Multiple Content Blocks | ~$0.15 |
+| **Total** | | **~$1.85** |
+
+---
+
+## Running Tests
+
+```bash
+cd DotNetSDK/samples/ClaudeAgentSDK.Samples
+
+# Show help menu
+dotnet run
+
+# Run quick smoke test (~$0.05)
+dotnet run quick
+
+# Run basic tests (~$0.15)
+dotnet run basic
+
+# Run feature tests (~$1.63)
+dotnet run features
+
+# Run advanced tests (~$1.85)
+dotnet run advanced
+
+# Run all tests (~$3.68)
+dotnet run all
+```
 
 ---
 

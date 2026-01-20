@@ -17,10 +17,28 @@ namespace ClaudeAgentSDK.Samples;
 public static class AdvancedFeatureTests
 {
     private static Action<string, bool>? LogCallback;
+    private static string? _currentTestModelUsed;
+
+    /// <summary>
+    /// Uses the same default model as FeatureTests for consistency
+    /// </summary>
+    private static string DefaultModel => FeatureTests.DefaultModel;
 
     private static void Log(string message, bool alsoConsole = true)
     {
         LogCallback?.Invoke(message, alsoConsole);
+    }
+
+    /// <summary>
+    /// Helper to track model used from AssistantMessage
+    /// </summary>
+    private static void TrackModelUsed(IMessage message)
+    {
+        if (message is AssistantMessage assistant && !string.IsNullOrEmpty(assistant.Model))
+        {
+            _currentTestModelUsed = assistant.Model;
+            Log($"  Model: {assistant.Model}");
+        }
     }
 
     /// <summary>
@@ -36,6 +54,7 @@ public static class AdvancedFeatureTests
         Log("============================================");
         Log("ADVANCED FEATURE TESTS");
         Log("============================================");
+        Log($"Default Model: {DefaultModel}");
         Log("");
 
         // ============================================
@@ -90,6 +109,14 @@ public static class AdvancedFeatureTests
         Log($"Passed: {passed}");
         Log($"Failed: {failed}");
         Log($"Total Cost: ${totalCost:F4}");
+        Log("");
+        Log("Model Usage per Test:");
+        foreach (var r in results)
+        {
+            var status = r.Passed ? "PASS" : "FAIL";
+            var model = r.ModelUsed ?? "(unknown)";
+            Log($"  [{status}] {r.TestName}: {model}");
+        }
 
         return results;
     }
@@ -101,6 +128,7 @@ public static class AdvancedFeatureTests
         Log($"\n=== {testName} ===");
         var start = DateTime.UtcNow;
         var result = new FeatureTests.TestResult { TestName = testName };
+        _currentTestModelUsed = null; // Reset for this test
 
         try
         {
@@ -108,6 +136,7 @@ public static class AdvancedFeatureTests
             result.Passed = success;
             result.CostUsd = cost;
             result.ErrorMessage = error;
+            result.ModelUsed = _currentTestModelUsed;
         }
         catch (Exception ex)
         {
@@ -119,6 +148,10 @@ public static class AdvancedFeatureTests
         result.Duration = DateTime.UtcNow - start;
         var status = result.Passed ? "PASSED" : "FAILED";
         Log($"  Result: {status}");
+        if (!string.IsNullOrEmpty(result.ModelUsed))
+        {
+            Log($"  Model Used: {result.ModelUsed}");
+        }
         return result;
     }
 
@@ -135,6 +168,7 @@ public static class AdvancedFeatureTests
         var options1 = new ClaudeAgentOptions
         {
             WorkingDirectory = workingDir,
+            Model = DefaultModel,
             MaxTurns = 1,
             MaxBudgetUsd = 0.10
         };
@@ -142,6 +176,7 @@ public static class AdvancedFeatureTests
         string? sessionId = null;
         await foreach (var message in ClaudeAgent.QueryAsync("Remember: My favorite color is blue", options1))
         {
+            TrackModelUsed(message);
             if (message is ResultMessage result)
             {
                 sessionId = result.SessionId;
@@ -158,6 +193,7 @@ public static class AdvancedFeatureTests
         var options2 = new ClaudeAgentOptions
         {
             WorkingDirectory = workingDir,
+            Model = DefaultModel,
             Resume = sessionId,
             MaxTurns = 1,
             MaxBudgetUsd = 0.10
@@ -169,6 +205,7 @@ public static class AdvancedFeatureTests
 
         await foreach (var message in ClaudeAgent.QueryAsync("What is my favorite color?", options2))
         {
+            TrackModelUsed(message);
             if (message is AssistantMessage assistant)
             {
                 foreach (var block in assistant.Content)
@@ -202,6 +239,7 @@ public static class AdvancedFeatureTests
         var options1 = new ClaudeAgentOptions
         {
             WorkingDirectory = workingDir,
+            Model = DefaultModel,
             MaxTurns = 1,
             MaxBudgetUsd = 0.10
         };
@@ -209,6 +247,7 @@ public static class AdvancedFeatureTests
         string? sessionId = null;
         await foreach (var message in ClaudeAgent.QueryAsync("Remember: X equals 42", options1))
         {
+            TrackModelUsed(message);
             if (message is ResultMessage result)
             {
                 sessionId = result.SessionId;
@@ -225,6 +264,7 @@ public static class AdvancedFeatureTests
         var options2 = new ClaudeAgentOptions
         {
             WorkingDirectory = workingDir,
+            Model = DefaultModel,
             Resume = sessionId,
             ForkSession = true,
             MaxTurns = 1,
@@ -236,6 +276,7 @@ public static class AdvancedFeatureTests
 
         await foreach (var message in ClaudeAgent.QueryAsync("What is X?", options2))
         {
+            TrackModelUsed(message);
             if (message is ResultMessage result)
             {
                 cost = (decimal?)(result.TotalCostUsd);
@@ -261,6 +302,7 @@ public static class AdvancedFeatureTests
         var options = new ClaudeAgentOptions
         {
             WorkingDirectory = workingDir,
+            Model = DefaultModel,
             IncludePartialMessages = true,
             MaxTurns = 1,
             MaxBudgetUsd = 0.10
@@ -271,6 +313,7 @@ public static class AdvancedFeatureTests
 
         await foreach (var message in ClaudeAgent.QueryAsync("Write a short poem about coding", options))
         {
+            TrackModelUsed(message);
             if (message is StreamEvent streamEvent)
             {
                 streamEventCount++;
@@ -299,6 +342,7 @@ public static class AdvancedFeatureTests
         var options = new ClaudeAgentOptions
         {
             WorkingDirectory = workingDir,
+            Model = DefaultModel,
             MaxThinkingTokens = 1024, // Request extended thinking
             MaxTurns = 1,
             MaxBudgetUsd = 0.20
@@ -311,6 +355,7 @@ public static class AdvancedFeatureTests
             "Think step by step about how to solve: If a train leaves at 3pm going 60mph and another at 4pm going 80mph, when do they meet?",
             options))
         {
+            TrackModelUsed(message);
             if (message is AssistantMessage assistant)
             {
                 foreach (var block in assistant.Content)
@@ -347,6 +392,7 @@ public static class AdvancedFeatureTests
     /// </summary>
     private static async Task<(bool, decimal?, string?)> TestA5_FallbackModel(string workingDir)
     {
+        // Note: This test uses specific models for fallback testing, not DefaultModel
         var options = new ClaudeAgentOptions
         {
             WorkingDirectory = workingDir,
@@ -361,6 +407,7 @@ public static class AdvancedFeatureTests
 
         await foreach (var message in ClaudeAgent.QueryAsync("Say 'fallback test'", options))
         {
+            TrackModelUsed(message);
             if (message is AssistantMessage assistant)
             {
                 modelUsed = assistant.Model;
@@ -383,6 +430,7 @@ public static class AdvancedFeatureTests
         var options = new ClaudeAgentOptions
         {
             WorkingDirectory = workingDir,
+            Model = DefaultModel,
             Betas = new List<string> { "interleaved-thinking" },
             MaxTurns = 1,
             MaxBudgetUsd = 0.10
@@ -392,6 +440,7 @@ public static class AdvancedFeatureTests
 
         await foreach (var message in ClaudeAgent.QueryAsync("Say 'beta test successful'", options))
         {
+            TrackModelUsed(message);
             if (message is ResultMessage result)
             {
                 cost = (decimal?)(result.TotalCostUsd);
@@ -416,6 +465,7 @@ public static class AdvancedFeatureTests
             var options = new ClaudeAgentOptions
             {
                 WorkingDirectory = workingDir,
+                Model = DefaultModel,
                 AddDirs = new List<string> { tempDir },
                 MaxTurns = 1,
                 MaxBudgetUsd = 0.10
@@ -425,6 +475,7 @@ public static class AdvancedFeatureTests
 
             await foreach (var message in ClaudeAgent.QueryAsync("Say 'additional directories configured'", options))
             {
+                TrackModelUsed(message);
                 if (message is ResultMessage result)
                 {
                     cost = (decimal?)(result.TotalCostUsd);
@@ -458,6 +509,7 @@ public static class AdvancedFeatureTests
         var options = new ClaudeAgentOptions
         {
             WorkingDirectory = workingDir,
+            Model = DefaultModel,
             MaxTurns = 1,
             MaxBudgetUsd = 0.10,
             Hooks = new Dictionary<HookEvent, List<HookMatcher>>
@@ -491,6 +543,7 @@ public static class AdvancedFeatureTests
 
         await foreach (var message in ClaudeAgent.QueryAsync("Test prompt for hook", options))
         {
+            TrackModelUsed(message);
             if (message is ResultMessage result)
             {
                 cost = (decimal?)(result.TotalCostUsd);
@@ -512,6 +565,7 @@ public static class AdvancedFeatureTests
         var options = new ClaudeAgentOptions
         {
             WorkingDirectory = workingDir,
+            Model = DefaultModel,
             MaxTurns = 1,
             MaxBudgetUsd = 0.10,
             Hooks = new Dictionary<HookEvent, List<HookMatcher>>
@@ -545,6 +599,7 @@ public static class AdvancedFeatureTests
 
         await foreach (var message in ClaudeAgent.QueryAsync("Say hello", options))
         {
+            TrackModelUsed(message);
             if (message is ResultMessage result)
             {
                 cost = (decimal?)(result.TotalCostUsd);
@@ -565,6 +620,7 @@ public static class AdvancedFeatureTests
         var options = new ClaudeAgentOptions
         {
             WorkingDirectory = workingDir,
+            Model = DefaultModel,
             MaxTurns = 2,
             MaxBudgetUsd = 0.15,
             Hooks = new Dictionary<HookEvent, List<HookMatcher>>
@@ -604,6 +660,7 @@ public static class AdvancedFeatureTests
 
         await foreach (var message in ClaudeAgent.QueryAsync("What is 2+2? Do not use any tools.", options))
         {
+            TrackModelUsed(message);
             if (message is ResultMessage result)
             {
                 cost = (decimal?)(result.TotalCostUsd);
@@ -626,6 +683,7 @@ public static class AdvancedFeatureTests
         var options = new ClaudeAgentOptions
         {
             WorkingDirectory = workingDir,
+            Model = DefaultModel,
             MaxTurns = 1,
             MaxBudgetUsd = 0.05
         };
@@ -652,6 +710,7 @@ public static class AdvancedFeatureTests
         decimal? cost = null;
         await foreach (var message in client.ReceiveResponseAsync())
         {
+            TrackModelUsed(message);
             if (message is ResultMessage result)
             {
                 cost = (decimal?)(result.TotalCostUsd);
@@ -675,6 +734,7 @@ public static class AdvancedFeatureTests
             var options = new ClaudeAgentOptions
             {
                 WorkingDirectory = testDir,
+                Model = DefaultModel,
                 EnableFileCheckpointing = true,
                 MaxTurns = 3,
                 MaxBudgetUsd = 0.20
@@ -686,6 +746,7 @@ public static class AdvancedFeatureTests
             string? userMessageId = null;
             await foreach (var message in client.ReceiveResponseAsync())
             {
+                TrackModelUsed(message);
                 if (message is UserMessage user)
                 {
                     userMessageId = user.Uuid;
@@ -735,6 +796,7 @@ public static class AdvancedFeatureTests
         var options = new ClaudeAgentOptions
         {
             WorkingDirectory = workingDir,
+            Model = DefaultModel,
             MaxTurns = 3,
             MaxBudgetUsd = 0.15
         };
@@ -745,6 +807,7 @@ public static class AdvancedFeatureTests
         await foreach (var message in ClaudeAgent.QueryAsync(
             "Read the first 3 lines of CLAUDE.md in the current directory", options))
         {
+            TrackModelUsed(message);
             if (message is UserMessage user)
             {
                 // Tool results come as user messages with tool_result content
@@ -780,6 +843,7 @@ public static class AdvancedFeatureTests
         var options = new ClaudeAgentOptions
         {
             WorkingDirectory = workingDir,
+            Model = DefaultModel,
             MaxTurns = 3,
             MaxBudgetUsd = 0.15
         };
@@ -791,6 +855,7 @@ public static class AdvancedFeatureTests
         await foreach (var message in ClaudeAgent.QueryAsync(
             "Read CLAUDE.md and then summarize what you found", options))
         {
+            TrackModelUsed(message);
             if (message is AssistantMessage assistant)
             {
                 if (assistant.Content.Count > maxBlocksInMessage)

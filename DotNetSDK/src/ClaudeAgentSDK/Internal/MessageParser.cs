@@ -22,10 +22,9 @@ public static class MessageParser
     /// <exception cref="MessageParseException">Thrown when the message cannot be parsed.</exception>
     public static IMessage ParseMessage(Dictionary<string, object?> data)
     {
-        if (!data.TryGetValue("type", out var typeObj) || typeObj is not string type)
-        {
-            throw new MessageParseException("Message missing 'type' field", data);
-        }
+        // Handle both string and JsonElement (from JSON deserialization)
+        var type = GetStringProperty(data, "type")
+            ?? throw new MessageParseException("Message missing 'type' field", data);
 
         return type switch
         {
@@ -43,7 +42,7 @@ public static class MessageParser
     /// </summary>
     public static bool IsControlRequest(Dictionary<string, object?> data)
     {
-        return data.TryGetValue("type", out var type) && type is string s && s == "control_request";
+        return GetStringProperty(data, "type") == "control_request";
     }
 
     /// <summary>
@@ -51,7 +50,7 @@ public static class MessageParser
     /// </summary>
     public static bool IsControlResponse(Dictionary<string, object?> data)
     {
-        return data.TryGetValue("type", out var type) && type is string s && s == "control_response";
+        return GetStringProperty(data, "type") == "control_response";
     }
 
     private static UserMessage ParseUserMessage(Dictionary<string, object?> data)

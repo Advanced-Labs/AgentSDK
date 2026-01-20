@@ -76,11 +76,17 @@ public sealed class QueryHandler : IAsyncDisposable
     }
 
     /// <summary>
-    /// Initializes the SDK control protocol (streaming mode only).
+    /// Gets whether the control protocol is enabled (has callbacks that require it).
+    /// </summary>
+    public bool IsControlProtocolEnabled => _canUseTool != null || (_hooks != null && _hooks.Count > 0);
+
+    /// <summary>
+    /// Initializes the SDK control protocol (streaming mode only, when control protocol is enabled).
     /// </summary>
     public async Task<Dictionary<string, object?>?> InitializeAsync(CancellationToken cancellationToken = default)
     {
-        if (!_isStreamingMode)
+        // Only initialize if we're in streaming mode AND control protocol is enabled
+        if (!_isStreamingMode || !IsControlProtocolEnabled)
             return null;
 
         var request = new InitializeRequest { ProtocolVersion = 1 };
@@ -140,10 +146,15 @@ public sealed class QueryHandler : IAsyncDisposable
     /// </summary>
     public async Task SendQueryAsync(string prompt, string? sessionId = null, CancellationToken cancellationToken = default)
     {
+        // CLI expects nested message structure: {"type":"user","message":{"role":"user","content":"..."}}
         var message = new Dictionary<string, object?>
         {
-            ["type"] = "user_message",
-            ["content"] = prompt
+            ["type"] = "user",
+            ["message"] = new Dictionary<string, object?>
+            {
+                ["role"] = "user",
+                ["content"] = prompt
+            }
         };
 
         if (!string.IsNullOrEmpty(sessionId))

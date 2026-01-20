@@ -90,6 +90,7 @@ void ShowMenu()
 async Task RunQuickSmokeTest()
 {
     Log("=== Quick Smoke Test ===");
+    Log($"Using model: {FeatureTests.DefaultModel}");
     Log("Testing basic connectivity and SDK functionality...");
 
     try
@@ -103,6 +104,7 @@ async Task RunQuickSmokeTest()
         var options = new ClaudeAgentOptions
         {
             WorkingDirectory = workingDir,
+            Model = FeatureTests.DefaultModel,
             MaxTurns = 1,
             MaxBudgetUsd = 0.05
         };
@@ -141,6 +143,7 @@ async Task RunBasicTests()
     Log($"=== Claude Agent SDK Diagnostic Sample ===");
     Log($"Working directory: {workingDir}");
     Log($"Log file: {logFile}");
+    Log($"Default model: {FeatureTests.DefaultModel}");
     Log($"");
 
     // Stderr callback to capture CLI debug output
@@ -227,6 +230,7 @@ async Task RunBasicTests()
         var options = new ClaudeAgentOptions
         {
             WorkingDirectory = workingDir,
+            Model = FeatureTests.DefaultModel,
             StderrCallback = OnStderr
         };
 
@@ -348,6 +352,7 @@ async Task RunBasicTests()
         var clientOptions = new ClaudeAgentOptions
         {
             WorkingDirectory = workingDir,
+            Model = FeatureTests.DefaultModel,
             StderrCallback = OnStderr
         };
 

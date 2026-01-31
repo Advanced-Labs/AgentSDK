@@ -4,7 +4,16 @@ from pathlib import Path
 
 class TestChangelog:
     def setup_method(self):
-        self.changelog_path = Path(__file__).parent.parent / "CHANGELOG.md"
+        # Look in PythonSDK directory first, then root directory
+        local_changelog = Path(__file__).parent.parent / "CHANGELOG.md"
+        root_changelog = Path(__file__).parent.parent.parent / "CHANGELOG.md"
+
+        if local_changelog.exists():
+            self.changelog_path = local_changelog
+        elif root_changelog.exists():
+            self.changelog_path = root_changelog
+        else:
+            self.changelog_path = local_changelog  # Fallback to local path for assertion error
 
     def test_changelog_exists(self):
         assert self.changelog_path.exists(), "CHANGELOG.md file should exist"
